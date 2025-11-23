@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 
@@ -7,9 +8,21 @@ function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // добавление сервера
   const [name, setName] = useState("");
   const [host, setHost] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  // редактирование сервера
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editHost, setEditHost] = useState("");
+  const [updateError, setUpdateError] = useState("");
+  const [updating, setUpdating] = useState(false);
+
+  // удаление
+  const [deletingId, setDeletingId] = useState(null);
 
   const loadServers = async () => {
     try {
@@ -32,7 +45,7 @@ function DashboardPage() {
     loadServers();
   }, []);
 
-  const handleSubmit = async (event) => {
+  const handleAddServer = async (event) => {
     event.preventDefault();
     setSubmitError("");
 
@@ -42,6 +55,7 @@ function DashboardPage() {
     }
 
     try {
+      setSubmitting(true);
       const response = await fetch(`${API_BASE_URL}/servers`, {
         method: "POST",
         headers: {
@@ -61,6 +75,81 @@ function DashboardPage() {
       setHost("");
     } catch (e) {
       setSubmitError(e.message || "Неизвестная ошибка");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const startEdit = (server) => {
+    setEditingId(server.id);
+    setEditName(server.name);
+    setEditHost(server.host);
+    setUpdateError("");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditName("");
+    setEditHost("");
+    setUpdateError("");
+  };
+
+  const handleUpdateServer = async (event) => {
+    event.preventDefault();
+    if (!editingId) return;
+
+    if (!editName.trim() || !editHost.trim()) {
+      setUpdateError("Заполните оба поля.");
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      const response = await fetch(`${API_BASE_URL}/servers/${editingId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: editName, host: editHost }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ошибка обновления: ${response.status}`);
+      }
+
+      const updated = await response.json();
+
+      setServers((prev) =>
+        prev.map((s) => (s.id === updated.id ? updated : s))
+      );
+
+      cancelEdit();
+    } catch (e) {
+      setUpdateError(e.message || "Неизвестная ошибка");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDeleteServer = async (id, name) => {
+    const confirmed = window.confirm(`Удалить сервер "${name}"?`);
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(id);
+      const response = await fetch(`${API_BASE_URL}/servers/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ошибка удаления: ${response.status}`);
+      }
+
+      setServers((prev) => prev.filter((s) => s.id !== id));
+    } catch (e) {
+      alert(e.message || "Ошибка удаления");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -77,19 +166,24 @@ function DashboardPage() {
     }
   };
 
+  // --- стили ---
 
-  const containerStyle = {
-  width: "100%",
-  maxWidth: "480px",
-  textAlign: "center",
+  const outerContainerStyle = {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
   };
 
+  const containerStyle = {
+    width: "100%",
+    maxWidth: "480px",
+    textAlign: "center",
+  };
 
   const titleStyle = {
     fontSize: "28px",
     fontWeight: 700,
     marginBottom: "24px",
-    textAlign: "center",
   };
 
   const cardStyle = {
@@ -101,16 +195,15 @@ function DashboardPage() {
     boxShadow: "0 10px 25px rgba(0, 0, 0, 0.45)",
   };
 
-
   const cardTitleStyle = {
     fontSize: "20px",
     fontWeight: 600,
     marginBottom: "16px",
-    textAlign: "center",
   };
 
   const formGroupStyle = {
     marginBottom: "12px",
+    textAlign: "left",
   };
 
   const labelStyle = {
@@ -151,6 +244,29 @@ function DashboardPage() {
     fontSize: "14px",
   };
 
+  const dangerButtonStyle = {
+    display: "inline-block",
+    padding: "6px 10px",
+    borderRadius: "999px",
+    border: "none",
+    backgroundColor: "#ef4444",
+    color: "#e5e7eb",
+    cursor: "pointer",
+    fontSize: "12px",
+  };
+
+  const smallButtonStyle = {
+    display: "inline-block",
+    padding: "6px 10px",
+    borderRadius: "999px",
+    border: "none",
+    backgroundColor: "#111827",
+    color: "#e5e7eb",
+    cursor: "pointer",
+    fontSize: "12px",
+    marginLeft: "8px",
+  };
+
   const errorTextStyle = {
     color: "#f97373",
     fontSize: "14px",
@@ -171,6 +287,7 @@ function DashboardPage() {
   const listItemStyle = {
     display: "flex",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: "8px",
     padding: "8px 10px",
     borderRadius: "10px",
@@ -183,88 +300,182 @@ function DashboardPage() {
     width: "12px",
     height: "12px",
     borderRadius: "999px",
+    marginRight: "6px",
+  };
+
+  const serverInfoStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  };
+
+  const serverNameLinkStyle = {
+    color: "#60a5fa",
+    textDecoration: "none",
   };
 
   return (
-  <div
-    style={{
-      width: "100%",
-      display: "flex",
-      justifyContent: "center",
-    }}
-  >
-    <div style={containerStyle}>
-      <h1 style={titleStyle}>Панель мониторинга</h1>
+    <div style={outerContainerStyle}>
+      <div style={containerStyle}>
+        <h1 style={titleStyle}>Панель мониторинга</h1>
 
-      <section style={cardStyle}>
-        <h2 style={cardTitleStyle}>Добавить сервер</h2>
+        {/* Карточка добавления */}
+        <section style={cardStyle}>
+          <h2 style={cardTitleStyle}>Добавить сервер</h2>
 
-        <form onSubmit={handleSubmit}>
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>
-              Название:
-              <input
-                type="text"
-                style={inputStyle}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </label>
-          </div>
-
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>
-              Host / IP:
-              <input
-                type="text"
-                style={inputStyle}
-                value={host}
-                onChange={(e) => setHost(e.target.value)}
-              />
-            </label>
-          </div>
-
-          {submitError && <p style={errorTextStyle}>{submitError}</p>}
-
-          <button type="submit" style={primaryButtonStyle}>
-            Сохранить
-          </button>
-        </form>
-      </section>
-
-      <div style={{ marginBottom: "12px" }}>
-        <button style={secondaryButtonStyle} onClick={loadServers}>
-          Обновить список
-        </button>
-      </div>
-
-      {loading && <p>Загрузка...</p>}
-      {error && <p style={errorTextStyle}>Ошибка: {error}</p>}
-
-      {servers.length === 0 && !loading && (
-        <p style={mutedTextStyle}>Серверов пока нет.</p>
-      )}
-
-      <ul style={listStyle}>
-        {servers.map((server) => (
-          <li key={server.id} style={listItemStyle}>
-            <span
-              style={{
-                ...statusDotBaseStyle,
-                backgroundColor: getStatusColor(server.status),
-              }}
-            ></span>
-            <div>
-              <strong>{server.name}</strong> ({server.host}) — статус:{" "}
-              {server.status || "unknown"}
+          <form onSubmit={handleAddServer}>
+            <div style={formGroupStyle}>
+              <label style={labelStyle}>
+                Название:
+                <input
+                  type="text"
+                  style={inputStyle}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </label>
             </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </div>
-);
 
+            <div style={formGroupStyle}>
+              <label style={labelStyle}>
+                Host / IP:
+                <input
+                  type="text"
+                  style={inputStyle}
+                  value={host}
+                  onChange={(e) => setHost(e.target.value)}
+                />
+              </label>
+            </div>
+
+            {submitError && <p style={errorTextStyle}>{submitError}</p>}
+
+            <button
+              type="submit"
+              style={primaryButtonStyle}
+              disabled={submitting}
+            >
+              {submitting ? "Сохраняем..." : "Сохранить"}
+            </button>
+          </form>
+        </section>
+
+        {/* Кнопка обновления */}
+        <div style={{ marginBottom: "12px" }}>
+          <button
+            style={secondaryButtonStyle}
+            onClick={loadServers}
+            disabled={loading}
+          >
+            {loading ? "Обновляем..." : "Обновить список"}
+          </button>
+        </div>
+
+        {error && <p style={errorTextStyle}>Ошибка: {error}</p>}
+
+        {/* Список серверов */}
+        {servers.length === 0 && !loading && (
+          <p style={mutedTextStyle}>Серверов пока нет.</p>
+        )}
+
+        {servers.length > 0 && (
+          <p style={mutedTextStyle}>Всего серверов: {servers.length}</p>
+        )}
+
+        <ul style={listStyle}>
+          {servers.map((server) => (
+            <li key={server.id} style={listItemStyle}>
+              <div style={serverInfoStyle}>
+                <span
+                  style={{
+                    ...statusDotBaseStyle,
+                    backgroundColor: getStatusColor(server.status),
+                  }}
+                ></span>
+                <div>
+                  <Link
+                    to={`/servers/${server.id}`}
+                    style={serverNameLinkStyle}
+                  >
+                    <strong>{server.name}</strong>
+                  </Link>{" "}
+                  <span>({server.host})</span>
+                </div>
+              </div>
+
+              <div>
+                <button
+                  style={smallButtonStyle}
+                  onClick={() => startEdit(server)}
+                >
+                  Редактировать
+                </button>
+                <button
+                  style={dangerButtonStyle}
+                  onClick={() => handleDeleteServer(server.id, server.name)}
+                  disabled={deletingId === server.id}
+                >
+                  {deletingId === server.id ? "Удаляем..." : "Удалить"}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        {/* Карточка редактирования (появляется при выборе сервера) */}
+        {editingId && (
+          <section style={cardStyle}>
+            <h2 style={cardTitleStyle}>Редактировать сервер</h2>
+
+            <form onSubmit={handleUpdateServer}>
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>
+                  Новое название:
+                  <input
+                    type="text"
+                    style={inputStyle}
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                  />
+                </label>
+              </div>
+
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>
+                  Новый host / IP:
+                  <input
+                    type="text"
+                    style={inputStyle}
+                    value={editHost}
+                    onChange={(e) => setEditHost(e.target.value)}
+                  />
+                </label>
+              </div>
+
+              {updateError && <p style={errorTextStyle}>{updateError}</p>}
+
+              <button
+                type="submit"
+                style={primaryButtonStyle}
+                disabled={updating}
+              >
+                {updating ? "Сохраняем..." : "Сохранить изменения"}
+              </button>
+
+              <button
+                type="button"
+                style={{ ...secondaryButtonStyle, marginLeft: "8px" }}
+                onClick={cancelEdit}
+                disabled={updating}
+              >
+                Отмена
+              </button>
+            </form>
+          </section>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default DashboardPage;

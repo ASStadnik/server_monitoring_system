@@ -1,5 +1,6 @@
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 import DashboardPage from "./pages/DashboardPage.jsx";
+import ServerDetailsPage from "./pages/ServerDetailsPage.jsx";
 
 function App() {
   const appStyle = {
@@ -45,8 +46,9 @@ function App() {
 
       <main style={mainStyle}>
         <Routes>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/servers/:id" element={<ServerDetailsPage />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </main>
     </div>
