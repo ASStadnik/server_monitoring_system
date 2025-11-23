@@ -1,0 +1,169 @@
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 16px;
+}
+
+.navbar {
+  padding: 16px 24px;
+  border-bottom: 1px solid #1f2937;
+  background-color: #020617;
+}
+
+.navbar a {
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.navbar a:hover {
+  text-decoration: underline;
+}
+
+/* Карточка и оформление панели */
+
+.dashboard-container {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.dashboard-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+
+
+.card {
+  background-color: #020617;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 0 auto 24px auto;
+  max-width: 420px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+
+
+.card-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* Форма */
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #4b5563;
+  background-color: #020617;
+  color: #e5e7eb;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #60a5fa;
+}
+
+/* Кнопки */
+
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background-color: #111827;
+  color: #e5e7eb;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+}
+
+.btn + .btn {
+  margin-left: 8px;
+}
+
+.btn:hover {
+  filter: brightness(1.15);
+}
+
+/* Ошибки и тексты */
+
+.error-text {
+  color: #f97373;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.muted-text {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* Список серверов */
+
+.server-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.server-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+  margin-bottom: 8px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.status-ok {
+  background-color: #22c55e;
+}
+
+.status-warn {
+  background-color: #facc15;
+}
+
+.status-crit {
+  background-color: #ef4444;
+}
+
+.status-unknown {
+  background-color: #6b7280;
+}
